@@ -84,9 +84,15 @@
 
         <!-- Mobile Tab Content -->
         <div id="mobileContent" style="display:none">
+          <div class="instruction-step" style="margin-bottom: 20px;">
+            <strong>Primary Option: Pay Directly</strong>
+            <p style="color:#6b7280; margin-top: 4px; margin-bottom: 12px; font-size:12px;">Click the button below to launch GPay, PhonePe, or Paytm automatically.</p>
+            <a id="upiLink" href="#" class="btn-upi">Pay ₹<span id="payAmount"></span> via UPI App</a>
+          </div>
+
           <div class="instruction-step" style="background:#f9fafb; padding:16px; border-radius:12px; border:1px solid #f3f4f6;">
-            <strong>Step 1: Copy UPI Details (Recommended)</strong>
-            <p style="color:#6b7280; margin-top: 4px; margin-bottom: 12px; font-size:12px;">Copy these details and paste them manually into GPay, PhonePe, or Paytm.</p>
+            <strong>Option 2: Copy UPI Details (Fallback)</strong>
+            <p style="color:#6b7280; margin-top: 4px; margin-bottom: 12px; font-size:12px;">If direct redirection is blocked, copy these details to pay manually inside your app.</p>
             <div class="copy-upi-box" style="margin-top: 10px; margin-bottom: 0;">
               <div class="upi-id-display" style="margin-bottom: 10px;">
                 <span id="copyUpiIdText"></span>
@@ -100,14 +106,8 @@
           </div>
 
           <div class="instruction-step" style="margin-top:20px; background:#f9fafb; padding:16px; border-radius:12px; border:1px solid #f3f4f6;">
-            <strong>Step 2: Screenshot QR & Scan from Gallery</strong>
-            <p style="color:#6b7280; margin-top: 4px; font-size:12px;">Go to the **Scan QR Code** tab, take a screenshot of the QR code, open GPay/PhonePe/Paytm, and click **"Upload from Gallery"** inside their scanner.</p>
-          </div>
-
-          <div class="instruction-step" style="margin-top:20px;">
-            <p style="font-size: 11px; line-height: 1.4; color: #dc2626; margin-bottom: 10px;">
-              ⚠️ <strong>Note</strong>: Direct browser clicks to open PhonePe or Paytm are blocked by NPCI/banks for safety on personal accounts. Copying or scanning screenshots is 100% reliable.
-            </p>
+            <strong>Option 3: Screenshot QR & Scan</strong>
+            <p style="color:#6b7280; margin-top: 4px; font-size:12px;">Go to the **Scan QR Code** tab, screenshot the QR, open your UPI scanner, and select **"Upload from Gallery"**.</p>
           </div>
         </div>
 
@@ -165,6 +165,10 @@
         document.querySelectorAll('.payAmountVal').forEach(el => {
           el.textContent = payment.amount.toFixed(2);
         });
+
+        // Set mobile redirect link
+        document.getElementById('upiLink').href = upiLink;
+        document.getElementById('payAmount').textContent = payment.amount.toFixed(2);
 
         document.getElementById('upiSection').style.display = '';
         document.getElementById('clientForm').style.display = 'none';
