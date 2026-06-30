@@ -84,14 +84,10 @@
 
         <!-- Mobile Tab Content -->
         <div id="mobileContent" style="display:none">
-          <div class="instruction-step">
-            <strong>Step 1: Save or Screenshot QR Code</strong>
-            <p style="color:#6b7280; margin-top: 4px;">Long-press the QR code image above, save it, or take a screenshot. Open your UPI app and select **"Upload from Gallery"** inside the QR scanner.</p>
-          </div>
-
-          <div class="instruction-step">
-            <strong>Step 2: Copy Details (Manual payment)</strong>
-            <div class="copy-upi-box" style="margin-top: 10px;">
+          <div class="instruction-step" style="background:#f9fafb; padding:16px; border-radius:12px; border:1px solid #f3f4f6;">
+            <strong>Step 1: Copy UPI Details (Recommended)</strong>
+            <p style="color:#6b7280; margin-top: 4px; margin-bottom: 12px; font-size:12px;">Copy these details and paste them manually into GPay, PhonePe, or Paytm.</p>
+            <div class="copy-upi-box" style="margin-top: 10px; margin-bottom: 0;">
               <div class="upi-id-display" style="margin-bottom: 10px;">
                 <span id="copyUpiIdText"></span>
                 <button id="copyUpiBtn">Copy ID</button>
@@ -103,14 +99,15 @@
             </div>
           </div>
 
-          <div class="instruction-step">
-            <strong>Step 3: Pay via App (Fallback)</strong>
-            <div class="app-links">
-              <a id="linkGPay" href="#" class="btn-app btn-gpay">Pay via Google Pay</a>
-              <a id="linkPhonePe" href="#" class="btn-app btn-phonepe">Pay via PhonePe</a>
-              <a id="linkPaytm" href="#" class="btn-app btn-paytm">Pay via Paytm</a>
-              <a id="upiLink" href="#" class="btn-upi" style="font-size:14px; padding:11px;">Pay via default UPI App</a>
-            </div>
+          <div class="instruction-step" style="margin-top:20px; background:#f9fafb; padding:16px; border-radius:12px; border:1px solid #f3f4f6;">
+            <strong>Step 2: Screenshot QR & Scan from Gallery</strong>
+            <p style="color:#6b7280; margin-top: 4px; font-size:12px;">Go to the **Scan QR Code** tab, take a screenshot of the QR code, open GPay/PhonePe/Paytm, and click **"Upload from Gallery"** inside their scanner.</p>
+          </div>
+
+          <div class="instruction-step" style="margin-top:20px;">
+            <p style="font-size: 11px; line-height: 1.4; color: #dc2626; margin-bottom: 10px;">
+              ⚠️ <strong>Note</strong>: Direct browser clicks to open PhonePe or Paytm are blocked by NPCI/banks for safety on personal accounts. Copying or scanning screenshots is 100% reliable.
+            </p>
           </div>
         </div>
 
@@ -155,9 +152,6 @@
         const clientBusiness = document.getElementById('clientBusiness').value.trim();
 
         const upiLink = 'upi://pay?pa=' + encodeURIComponent(payment.upiId) + '&pn=' + encodeURIComponent(payment.personName) + '&am=' + payment.amount.toFixed(2) + '&cu=INR&tn=Payment%20' + paymentId;
-        const gpayLink = 'tez://upi/pay?pa=' + encodeURIComponent(payment.upiId) + '&pn=' + encodeURIComponent(payment.personName) + '&am=' + payment.amount.toFixed(2) + '&cu=INR&tn=Payment%20' + paymentId;
-        const phonepeLink = 'phonepe://pay?pa=' + encodeURIComponent(payment.upiId) + '&pn=' + encodeURIComponent(payment.personName) + '&am=' + payment.amount.toFixed(2) + '&cu=INR&tn=Payment%20' + paymentId;
-        const paytmLink = 'paytmmp://pay?pa=' + encodeURIComponent(payment.upiId) + '&pn=' + encodeURIComponent(payment.personName) + '&am=' + payment.amount.toFixed(2) + '&cu=INR&tn=Payment%20' + paymentId;
 
         // Generate QR Code URL
         const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(upiLink);
@@ -168,13 +162,6 @@
         document.querySelectorAll('.payAmountVal').forEach(el => {
           el.textContent = payment.amount.toFixed(2);
         });
-
-        // Set mobile deep link fallbacks
-        document.getElementById('linkGPay').href = gpayLink;
-        document.getElementById('linkPhonePe').href = phonepeLink;
-        document.getElementById('linkPaytm').href = paytmLink;
-        document.getElementById('upiLink').href = upiLink;
-        document.getElementById('payAmount').textContent = payment.amount;
 
         document.getElementById('upiSection').style.display = '';
         document.getElementById('clientForm').style.display = 'none';
