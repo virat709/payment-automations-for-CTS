@@ -1,0 +1,12 @@
+{
+  "name": "upi-payment-link-generator",
+  "version": "1.0.0",
+  "description": "Generate UPI payment links to share with clients",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0"
+  }
+}

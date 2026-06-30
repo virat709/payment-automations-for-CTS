@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Confirmed</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="card" id="errorCard" style="display:none">
+      <p class="loading-text">Invalid receipt link.</p>
+    </div>
+
+    <div class="card" id="successCard" style="display:none">
+      <div class="success-icon">
+        <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+          <circle cx="32" cy="32" r="30" fill="#10B981" opacity="0.15"/>
+          <path d="M20 32L28 40L44 24" stroke="#10B981" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h1>Payment Successful</h1>
+      <p class="subtitle">Your payment has been confirmed.</p>
+
+      <div class="receipt">
+        <div class="receipt-header">
+          <h3>PAYMENT RECEIPT</h3>
+        </div>
+        <div class="receipt-body">
+          <div class="receipt-row">
+            <span class="receipt-label">Amount Paid</span>
+            <span class="receipt-value receipt-amount" id="rAmount">₹0</span>
+          </div>
+          <div class="receipt-row">
+            <span class="receipt-label">Paid To</span>
+            <span class="receipt-value" id="rBusiness">—</span>
+          </div>
+          <div class="receipt-row">
+            <span class="receipt-label">UPI ID</span>
+            <span class="receipt-value" id="rUpi">—</span>
+          </div>
+          <div class="receipt-row">
+            <span class="receipt-label">Paid By</span>
+            <span class="receipt-value" id="rClient">—</span>
+          </div>
+          <div class="receipt-row">
+            <span class="receipt-label">Date</span>
+            <span class="receipt-value" id="rDate">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const paymentId = window.location.pathname.split('/').pop();
+
+    async function loadPayment() {
+      const res = await fetch('/api/payments/' + paymentId);
+      if (!res.ok) {
+        document.getElementById('errorCard').style.display = '';
+        return;
+      }
+      const payment = await res.json();
+      const now = new Date(payment.confirmedAt || payment.createdAt);
+      const dateStr = now.toLocaleDateString('en-IN', {
+        day: '2-digit', month: 'short', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      });
+
+      document.getElementById('rAmount').textContent = '₹' + payment.amount;
+      document.getElementById('rBusiness').textContent = payment.personName;
+      document.getElementById('rUpi').textContent = payment.upiId;
+      document.getElementById('rClient').textContent = payment.clientName || '—';
+      document.getElementById('rDate').textContent = dateStr;
+      document.getElementById('successCard').style.display = '';
+    }
+
+    loadPayment();
+  </script>
+</body>
+</html>

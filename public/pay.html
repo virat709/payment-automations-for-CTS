@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complete Your Payment</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="card" id="loadingCard">
+      <p class="loading-text">Loading payment details...</p>
+    </div>
+
+    <div class="card" id="errorCard" style="display:none">
+      <p class="loading-text">Invalid or expired payment link.</p>
+    </div>
+
+    <div class="card" id="paidCard" style="display:none">
+      <div class="success-icon">
+        <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+          <circle cx="32" cy="32" r="30" fill="#10B981" opacity="0.15"/>
+          <path d="M20 32L28 40L44 24" stroke="#10B981" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h1>Payment Submitted!</h1>
+      <p class="subtitle">Thank you. Your payment has been recorded.</p>
+    </div>
+
+    <div class="card" id="paymentCard" style="display:none">
+      <div class="logo">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+          <rect width="48" height="48" rx="12" fill="#6C27FF"/>
+          <path d="M14 24L20 16L26 24L20 32L14 24Z" fill="white" opacity="0.8"/>
+          <path d="M22 24L28 16L34 24L28 32L22 24Z" fill="white"/>
+        </svg>
+      </div>
+      <h1>Payment Details</h1>
+
+      <div class="payment-info">
+        <div class="info-row">
+          <span class="label">Amount</span>
+          <span class="value amount" id="displayAmount">₹0</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Pay to</span>
+          <span class="value" id="displayBusiness">—</span>
+        </div>
+        <div class="info-row">
+          <span class="label">UPI ID</span>
+          <span class="value" id="displayUpi">—</span>
+        </div>
+      </div>
+
+      <form id="clientForm">
+        <div class="form-group">
+          <label for="clientName">Your Name</label>
+          <input type="text" id="clientName" placeholder="e.g. Rahul Sharma" required>
+        </div>
+        <div class="form-group">
+          <label for="clientBusiness">Your Business Name</label>
+          <input type="text" id="clientBusiness" placeholder="e.g. Sharma & Sons">
+        </div>
+        <button type="submit">Continue to Pay</button>
+      </form>
+
+      <div id="upiSection" style="display:none">
+        <a id="upiLink" href="#" class="btn-upi">Pay ₹<span id="payAmount"></span> via UPI</a>
+
+        <div class="divider"><span>Done paying?</span></div>
+        <button class="btn-success" id="paidBtn">I've Paid</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const paymentId = window.location.pathname.split('/').pop();
+
+    async function loadPayment() {
+      const res = await fetch('/api/payments/' + paymentId);
+      if (!res.ok) {
+        document.getElementById('loadingCard').style.display = 'none';
+        document.getElementById('errorCard').style.display = '';
+        return;
+      }
+      const payment = await res.json();
+
+      if (payment.status === 'confirmed') {
+        document.getElementById('loadingCard').style.display = 'none';
+        document.getElementById('paidCard').style.display = '';
+        return;
+      }
+
+      document.getElementById('loadingCard').style.display = 'none';
+      document.getElementById('paymentCard').style.display = '';
+
+      document.getElementById('displayAmount').textContent = '₹' + payment.amount;
+      document.getElementById('displayBusiness').textContent = payment.personName;
+      document.getElementById('displayUpi').textContent = payment.upiId;
+
+      document.getElementById('clientForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const btn = e.target.querySelector('button');
+        btn.textContent = 'Please wait...';
+        btn.disabled = true;
+
+        const clientName = document.getElementById('clientName').value.trim();
+        const clientBusiness = document.getElementById('clientBusiness').value.trim();
+
+        const upiLink = 'upi://pay?pa=' + encodeURIComponent(payment.upiId) + '&pn=' + encodeURIComponent(payment.personName) + '&am=' + payment.amount.toFixed(2) + '&cu=INR&tn=Payment%20' + paymentId;
+
+        document.getElementById('upiLink').href = upiLink;
+        document.getElementById('payAmount').textContent = payment.amount;
+        document.getElementById('upiSection').style.display = '';
+        document.getElementById('clientForm').style.display = 'none';
+      });
+
+      document.getElementById('paidBtn').addEventListener('click', async () => {
+        const clientName = document.getElementById('clientName').value.trim();
+        const clientBusiness = document.getElementById('clientBusiness').value.trim();
+        const confirmRes = await fetch('/api/payments/' + paymentId + '/confirm', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ clientName, clientBusiness })
+        });
+        if (confirmRes.ok) {
+          document.getElementById('paymentCard').style.display = 'none';
+          document.getElementById('paidCard').style.display = '';
+        } else {
+          alert('Error confirming payment. Please try again.');
+        }
+      });
+    }
+
+    loadPayment();
+  </script>
+</body>
+</html>

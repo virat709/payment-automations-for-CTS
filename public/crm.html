@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRM Sheet</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="container wide">
+    <div class="card">
+      <a href="/crm" class="logo-link">
+        <div class="logo">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <rect width="48" height="48" rx="12" fill="#6C27FF"/>
+            <path d="M14 24L20 16L26 24L20 32L14 24Z" fill="white" opacity="0.8"/>
+            <path d="M22 24L28 16L34 24L28 32L22 24Z" fill="white"/>
+          </svg>
+        </div>
+      </a>
+      <h1>CRM Sheet</h1>
+      <p class="subtitle">Track all payments and mark them as confirmed</p>
+
+      <div class="nav-links">
+        <a href="/" class="nav-link">Dashboard</a>
+        <a href="/crm" class="nav-link active">CRM Sheet</a>
+        <a href="/analytics" class="nav-link">Analytics</a>
+      </div>
+
+      <div class="filter-bar">
+        <label for="personFilter">Filter by Person:</label>
+        <select id="personFilter">
+          <option value="">All</option>
+        </select>
+        <button id="filterBtn">Apply</button>
+        <button id="resetFilterBtn">Reset</button>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Name</th>
+              <th>Customer Name</th>
+              <th>Business</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="crmBody">
+            <tr><td colspan="7" class="loading-row">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="summary-bar">
+        <span>Total: <strong id="totalCount">0</strong> payments</span>
+        <span>Amount: <strong id="totalAmount">₹0</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function loadPersons() {
+      const res = await fetch('/api/persons');
+      const persons = await res.json();
+      const select = document.getElementById('personFilter');
+      persons.forEach(p => {
+        const option = document.createElement('option');
+        option.value = p;
+        option.textContent = p;
+        select.appendChild(option);
+      });
+    }
+
+    async function loadCRM(person) {
+      let url = '/api/payments';
+      if (person) url += '?person=' + encodeURIComponent(person);
+      const res = await fetch(url);
+      const payments = await res.json();
+      const tbody = document.getElementById('crmBody');
+      tbody.innerHTML = '';
+
+      let totalAmt = 0;
+      for (const p of payments) {
+        const tr = document.createElement('tr');
+        const statusClass = p.status === 'confirmed' ? 'status-confirmed' : 'status-pending';
+        const date = new Date(p.createdAt).toLocaleDateString('en-IN', {
+          day: '2-digit', month: 'short', year: 'numeric'
+        });
+        if (p.status === 'confirmed') totalAmt += p.amount;
+
+        let actionCell = '<td>—</td>';
+        if (p.status === 'pending') {
+          actionCell = `<td><button class="btn-confirm" data-id="${p.id}">Confirm</button></td>`;
+        }
+
+        tr.innerHTML = `
+          <td>${date}</td>
+          <td>${p.personName}</td>
+          <td>${p.clientName || '—'}</td>
+          <td>${p.clientBusiness || '—'}</td>
+          <td>₹${p.amount.toFixed(2)}</td>
+          <td><span class="${statusClass}">${p.status}</span></td>
+          ${actionCell}
+        `;
+        tbody.appendChild(tr);
+      }
+
+      if (payments.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="loading-row">No payments found</td></tr>';
+      }
+
+      const confirmedPayments = payments.filter(p => p.status === 'confirmed');
+      document.getElementById('totalCount').textContent = confirmedPayments.length;
+      document.getElementById('totalAmount').textContent = '₹' + totalAmt.toFixed(2);
+
+      document.querySelectorAll('.btn-confirm').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const id = btn.dataset.id;
+          btn.textContent = 'Confirming...';
+          btn.disabled = true;
+          const res = await fetch('/api/payments/' + id + '/confirm', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+          });
+          if (res.ok) {
+            loadCRM(document.getElementById('personFilter').value);
+          } else {
+            alert('Failed to confirm. The payment may already be confirmed.');
+            btn.textContent = 'Confirm';
+            btn.disabled = false;
+          }
+        });
+      });
+    }
+
+    loadPersons();
+    loadCRM('');
+
+    document.getElementById('filterBtn').addEventListener('click', () => {
+      const person = document.getElementById('personFilter').value;
+      loadCRM(person);
+    });
+
+    document.getElementById('resetFilterBtn').addEventListener('click', () => {
+      document.getElementById('personFilter').value = '';
+      loadCRM('');
+    });
+  </script>
+</body>
+</html>
