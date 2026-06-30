@@ -651,3 +651,31 @@ tr:hover td {
   .filter-bar button { width: 100%; }
   .summary-bar { flex-direction: column; align-items: center; gap: 4px; }
 }
+
+.qr-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 24px 0;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 12px;
+  border: 1px solid #f3f4f6;
+}
+
+.qr-code-img {
+  width: 200px;
+  height: 200px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.qr-instruction {
+  font-size: 13px;
+  color: #4b5563;
+  text-align: center;
+  line-height: 1.5;
+  margin-bottom: 4px;
+}

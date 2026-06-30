@@ -65,7 +65,31 @@
       </form>
 
       <div id="upiSection" style="display:none">
-        <a id="upiLink" href="#" class="btn-upi">Pay ₹<span id="payAmount"></span> via UPI</a>
+        <div class="qr-container">
+          <img id="qrCode" class="qr-code-img" src="" alt="UPI QR Code">
+          <p class="qr-instruction">Scan QR with GPay, PhonePe, Paytm or BHIM</p>
+          <p class="hint" style="margin-top:0">Amount: <strong style="color:#1a1a2e">₹<span class="payAmountVal"></span></strong></p>
+        </div>
+
+        <div class="divider"><span>Or Pay Manually</span></div>
+
+        <div class="copy-upi-box" style="margin-top: 10px;">
+          <p>Copy details to pay manually from your UPI App:</p>
+          
+          <div class="upi-id-display" style="margin-bottom: 10px;">
+            <span id="copyUpiIdText"></span>
+            <button id="copyUpiBtn">Copy ID</button>
+          </div>
+
+          <div class="upi-id-display">
+            <span>₹<span class="payAmountVal"></span></span>
+            <button id="copyAmountBtn">Copy Amount</button>
+          </div>
+        </div>
+
+        <div class="divider"><span>Mobile Fallback</span></div>
+
+        <a id="upiLink" href="#" class="btn-upi" style="margin-bottom: 20px;">Pay ₹<span id="payAmount"></span> via UPI App</a>
 
         <div class="divider"><span>Done paying?</span></div>
         <button class="btn-success" id="paidBtn">I've Paid</button>
@@ -109,10 +133,41 @@
 
         const upiLink = 'upi://pay?pa=' + encodeURIComponent(payment.upiId) + '&pn=' + encodeURIComponent(payment.personName) + '&am=' + payment.amount.toFixed(2) + '&cu=INR&tn=Payment%20' + paymentId;
 
+        // Generate QR Code URL
+        const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(upiLink);
+        document.getElementById('qrCode').src = qrUrl;
+
+        // Setup copy boxes
+        document.getElementById('copyUpiIdText').textContent = payment.upiId;
+        document.querySelectorAll('.payAmountVal').forEach(el => {
+          el.textContent = payment.amount.toFixed(2);
+        });
+
+        // Set mobile deep link
         document.getElementById('upiLink').href = upiLink;
         document.getElementById('payAmount').textContent = payment.amount;
+
         document.getElementById('upiSection').style.display = '';
         document.getElementById('clientForm').style.display = 'none';
+      });
+
+      // Wire up copy buttons
+      document.getElementById('copyUpiBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        navigator.clipboard.writeText(payment.upiId).then(() => {
+          const btn = document.getElementById('copyUpiBtn');
+          btn.textContent = 'Copied!';
+          setTimeout(() => { btn.textContent = 'Copy ID'; }, 2000);
+        });
+      });
+
+      document.getElementById('copyAmountBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        navigator.clipboard.writeText(payment.amount.toFixed(2)).then(() => {
+          const btn = document.getElementById('copyAmountBtn');
+          btn.textContent = 'Copied!';
+          setTimeout(() => { btn.textContent = 'Copy Amount'; }, 2000);
+        });
       });
 
       document.getElementById('paidBtn').addEventListener('click', async () => {
