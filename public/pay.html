@@ -65,31 +65,54 @@
       </form>
 
       <div id="upiSection" style="display:none">
-        <div class="qr-container">
-          <img id="qrCode" class="qr-code-img" src="" alt="UPI QR Code">
-          <p class="qr-instruction">Scan QR with GPay, PhonePe, Paytm or BHIM</p>
-          <p class="hint" style="margin-top:0">Amount: <strong style="color:#1a1a2e">₹<span class="payAmountVal"></span></strong></p>
+        <div class="payment-tabs">
+          <button class="payment-tab active" id="tabScan">Scan QR Code</button>
+          <button class="payment-tab" id="tabMobile">Pay on Mobile</button>
         </div>
 
-        <div class="divider"><span>Or Pay Manually</span></div>
-
-        <div class="copy-upi-box" style="margin-top: 10px;">
-          <p>Copy details to pay manually from your UPI App:</p>
-          
-          <div class="upi-id-display" style="margin-bottom: 10px;">
-            <span id="copyUpiIdText"></span>
-            <button id="copyUpiBtn">Copy ID</button>
+        <!-- Scan Tab Content -->
+        <div id="scanContent">
+          <div class="qr-container">
+            <img id="qrCode" class="qr-code-img" src="" alt="UPI QR Code">
+            <p class="qr-instruction">Scan QR with GPay, PhonePe, Paytm or BHIM</p>
+            <p class="hint" style="margin-top:0">Amount: <strong style="color:#1a1a2e">₹<span class="payAmountVal"></span></strong></p>
           </div>
-
-          <div class="upi-id-display">
-            <span>₹<span class="payAmountVal"></span></span>
-            <button id="copyAmountBtn">Copy Amount</button>
-          </div>
+          <p class="hint-strong" style="font-size:12px; margin-top:-10px; margin-bottom: 20px;">
+            Scan this code from a computer/tablet or another device to pay.
+          </p>
         </div>
 
-        <div class="divider"><span>Mobile Fallback</span></div>
+        <!-- Mobile Tab Content -->
+        <div id="mobileContent" style="display:none">
+          <div class="instruction-step">
+            <strong>Step 1: Save or Screenshot QR Code</strong>
+            <p style="color:#6b7280; margin-top: 4px;">Long-press the QR code image above, save it, or take a screenshot. Open your UPI app and select **"Upload from Gallery"** inside the QR scanner.</p>
+          </div>
 
-        <a id="upiLink" href="#" class="btn-upi" style="margin-bottom: 20px;">Pay ₹<span id="payAmount"></span> via UPI App</a>
+          <div class="instruction-step">
+            <strong>Step 2: Copy Details (Manual payment)</strong>
+            <div class="copy-upi-box" style="margin-top: 10px;">
+              <div class="upi-id-display" style="margin-bottom: 10px;">
+                <span id="copyUpiIdText"></span>
+                <button id="copyUpiBtn">Copy ID</button>
+              </div>
+              <div class="upi-id-display">
+                <span>₹<span class="payAmountVal"></span></span>
+                <button id="copyAmountBtn">Copy Amount</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="instruction-step">
+            <strong>Step 3: Pay via App (Fallback)</strong>
+            <div class="app-links">
+              <a id="linkGPay" href="#" class="btn-app btn-gpay">Pay via Google Pay</a>
+              <a id="linkPhonePe" href="#" class="btn-app btn-phonepe">Pay via PhonePe</a>
+              <a id="linkPaytm" href="#" class="btn-app btn-paytm">Pay via Paytm</a>
+              <a id="upiLink" href="#" class="btn-upi" style="font-size:14px; padding:11px;">Pay via default UPI App</a>
+            </div>
+          </div>
+        </div>
 
         <div class="divider"><span>Done paying?</span></div>
         <button class="btn-success" id="paidBtn">I've Paid</button>
@@ -132,6 +155,9 @@
         const clientBusiness = document.getElementById('clientBusiness').value.trim();
 
         const upiLink = 'upi://pay?pa=' + encodeURIComponent(payment.upiId) + '&pn=' + encodeURIComponent(payment.personName) + '&am=' + payment.amount.toFixed(2) + '&cu=INR&tn=Payment%20' + paymentId;
+        const gpayLink = 'tez://upi/pay?pa=' + encodeURIComponent(payment.upiId) + '&pn=' + encodeURIComponent(payment.personName) + '&am=' + payment.amount.toFixed(2) + '&cu=INR&tn=Payment%20' + paymentId;
+        const phonepeLink = 'phonepe://pay?pa=' + encodeURIComponent(payment.upiId) + '&pn=' + encodeURIComponent(payment.personName) + '&am=' + payment.amount.toFixed(2) + '&cu=INR&tn=Payment%20' + paymentId;
+        const paytmLink = 'paytmmp://pay?pa=' + encodeURIComponent(payment.upiId) + '&pn=' + encodeURIComponent(payment.personName) + '&am=' + payment.amount.toFixed(2) + '&cu=INR&tn=Payment%20' + paymentId;
 
         // Generate QR Code URL
         const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(upiLink);
@@ -143,13 +169,44 @@
           el.textContent = payment.amount.toFixed(2);
         });
 
-        // Set mobile deep link
+        // Set mobile deep link fallbacks
+        document.getElementById('linkGPay').href = gpayLink;
+        document.getElementById('linkPhonePe').href = phonepeLink;
+        document.getElementById('linkPaytm').href = paytmLink;
         document.getElementById('upiLink').href = upiLink;
         document.getElementById('payAmount').textContent = payment.amount;
 
         document.getElementById('upiSection').style.display = '';
         document.getElementById('clientForm').style.display = 'none';
       });
+
+      // Tab switcher event handlers
+      const tabScan = document.getElementById('tabScan');
+      const tabMobile = document.getElementById('tabMobile');
+      const scanContent = document.getElementById('scanContent');
+      const mobileContent = document.getElementById('mobileContent');
+
+      tabScan.addEventListener('click', (e) => {
+        e.preventDefault();
+        tabScan.classList.add('active');
+        tabMobile.classList.remove('active');
+        scanContent.style.display = '';
+        mobileContent.style.display = 'none';
+      });
+
+      tabMobile.addEventListener('click', (e) => {
+        e.preventDefault();
+        tabMobile.classList.add('active');
+        tabScan.classList.remove('active');
+        scanContent.style.display = 'none';
+        mobileContent.style.display = '';
+      });
+
+      // Auto-detect mobile devices to pre-select "Pay on Mobile" tab
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      if (isMobile) {
+        tabMobile.click();
+      }
 
       // Wire up copy buttons
       document.getElementById('copyUpiBtn').addEventListener('click', (e) => {

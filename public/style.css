@@ -679,3 +679,70 @@ tr:hover td {
   line-height: 1.5;
   margin-bottom: 4px;
 }
+
+/* Tabs for Payment Flow */
+.payment-tabs {
+  display: flex;
+  border-bottom: 2px solid #e5e7eb;
+  margin-bottom: 20px;
+}
+
+.payment-tab {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  background: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+}
+
+.payment-tab.active {
+  color: #6C27FF;
+  border-bottom-color: #6C27FF;
+}
+
+.instruction-step {
+  text-align: left;
+  font-size: 13px;
+  color: #4b5563;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.instruction-step strong {
+  color: #1a1a2e;
+}
+
+.app-links {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.btn-app {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  color: white;
+  transition: opacity 0.2s;
+}
+
+.btn-app:hover {
+  opacity: 0.9;
+}
+
+.btn-gpay { background: #1a73e8; }
+.btn-phonepe { background: #5f259f; }
+.btn-paytm { background: #00baf2; }
