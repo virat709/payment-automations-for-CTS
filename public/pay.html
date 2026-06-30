@@ -151,7 +151,10 @@
         const clientName = document.getElementById('clientName').value.trim();
         const clientBusiness = document.getElementById('clientBusiness').value.trim();
 
-        const upiLink = 'upi://pay?pa=' + encodeURIComponent(payment.upiId) + '&pn=' + encodeURIComponent(payment.personName) + '&am=' + payment.amount.toFixed(2) + '&cu=INR&tn=Payment%20' + paymentId;
+        let upiLink = 'upi://pay?pa=' + encodeURIComponent(payment.upiId) + '&pn=' + encodeURIComponent(payment.personName) + '&am=' + payment.amount.toFixed(2) + '&cu=INR&tn=Payment%20' + paymentId;
+        if (payment.mcc) {
+          upiLink += '&mc=' + encodeURIComponent(payment.mcc) + '&mode=02&purpose=00';
+        }
 
         // Generate QR Code URL
         const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(upiLink);
